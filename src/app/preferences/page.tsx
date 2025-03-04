@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "@/library/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import Link from "next/link";
-import ProtectedRoute from "@/components/ProtectedRoute"; // ✅ Import route protection
+import ProtectedRoute from "@/components/ProtectedRoute"; // Or your route protection
 
 export default function PreferencesPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function PreferencesPage() {
     const fetchUserData = async () => {
       const user = auth.currentUser;
       if (!user) {
-        router.push("/login"); // ✅ Redirect if not logged in
+        router.push("/login");
         return;
       }
 
@@ -33,7 +33,7 @@ export default function PreferencesPage() {
       const userDocSnap = await getDoc(userDocRef);
 
       if (!userDocSnap.exists() || userDocSnap.data().role !== "student") {
-        router.push("/login"); // ✅ Redirect unauthorized users
+        router.push("/login");
         return;
       }
 
@@ -55,7 +55,9 @@ export default function PreferencesPage() {
   }, [router]);
 
   // Update form state on input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -87,8 +89,8 @@ export default function PreferencesPage() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={["student"]}> {/* ✅ Protecting the route */}
-      <div className="font-sans min-h-screen flex flex-col">
+    <ProtectedRoute allowedRoles={["student"]}>
+      <div className="font-sans min-h-screen flex flex-col bg-green-50">
         {/* HEADER */}
         <header className="fixed top-0 left-0 w-full flex justify-between items-center p-6 bg-black bg-opacity-70 backdrop-blur-md border-b border-white/20 shadow-lg z-50">
           <div className="text-2xl font-bold text-white">
@@ -97,9 +99,11 @@ export default function PreferencesPage() {
         </header>
 
         {/* MAIN CONTENT: PREFERENCES FORM */}
-        <main className="flex-1 flex flex-col items-center justify-center bg-gray-100 pt-24">
+        <main className="flex-1 flex flex-col items-center justify-center pt-24">
           <div className="w-full max-w-lg mx-auto bg-green-100 p-8 shadow-md rounded-lg mt-12 mb-12">
-            <h1 className="text-3xl font-bold mb-6 text-center text-black">Student Preferences</h1>
+            <h1 className="text-3xl font-bold mb-6 text-center text-black">
+              Student Preferences
+            </h1>
             {error && <p className="text-red-600 text-center mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -197,10 +201,26 @@ export default function PreferencesPage() {
           </div>
         </main>
 
-        {/* FOOTER */}
+        {/* FOOTER (Same as page.tsx) */}
         <footer className="bg-green-900 text-white py-8 px-6">
           <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
             <h2 className="text-2xl font-bold">Driving School</h2>
+            <div className="flex flex-wrap justify-center gap-6">
+              {["Features", "Pricing", "FAQ", "Privacy Policy", "Terms of Service"].map(
+                (link, index) => (
+                  <a key={index} href="#" className="hover:text-white transition">
+                    {link}
+                  </a>
+                )
+              )}
+            </div>
+            <div className="flex space-x-4 mt-6 md:mt-0">
+              {["facebook", "twitter", "instagram"].map((icon, index) => (
+                <a key={index} href="#" className="hover:text-white transition">
+                  <img src={`/${icon}.svg`} alt={icon} className="w-6 h-6" />
+                </a>
+              ))}
+            </div>
           </div>
           <div className="text-center text-sm mt-6">
             © 2025 Driving School. All rights reserved.

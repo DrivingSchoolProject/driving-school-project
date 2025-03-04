@@ -424,7 +424,13 @@ export default function Home() {
               >
                 Want to Learn
               </button>
-              <button className="w-full py-4 bg-blue-600 text-white rounded-md hover:bg-yellow-500 text-xl">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  router.push("/instructorSignup");
+                }}
+                className="w-full py-4 bg-blue-600 text-white rounded-md hover:bg-yellow-500 text-xl"
+              >
                 Want to Teach
               </button>
             </div>
