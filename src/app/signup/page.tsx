@@ -1,26 +1,29 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { auth } from "@/library/firebase"; // Adjust path if needed
+import { useRouter } from "next/navigation";
+import { auth, db } from "@/library/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import Link from "next/link";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  // Update form state on input change
+  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value,
-    }));
+    });
   };
 
   // Handle form submission
@@ -28,31 +31,39 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
 
-    // Check if passwords match
+    // Check password match
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       return;
     }
 
     try {
-      // Create a new user in Firebase Authentication
-      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      // Show success popup
-      setSuccess(true);
-      // Optionally, clear the form fields
-      setFormData({
-        fullName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
+
+      // Save user info in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        role: "student",
+        approved: true, // Students are automatically approved
       });
+
+      // Redirect to Preferences page
+      router.push("/preferences");
     } catch (err: any) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="font-sans relative min-h-screen flex flex-col">
+    <div className="font-sans min-h-screen flex flex-col bg-green-50">
       {/* HEADER */}
       <header className="fixed top-0 left-0 w-full flex justify-between items-center p-6 bg-black bg-opacity-70 backdrop-blur-md border-b border-white/20 shadow-lg z-50">
         <div className="text-2xl font-bold text-white">
@@ -61,22 +72,27 @@ export default function SignupPage() {
       </header>
 
       {/* MAIN CONTENT: SIGNUP FORM */}
-      <main className="flex-1 flex flex-col items-center justify-center bg-gray-100 pt-24">
-        <div
-          className="w-full max-w-md mx-auto bg-green-100 p-8 shadow-md rounded-lg mt-12 mb-12 transform transition-transform hover:scale-105 hover:shadow-xl"
-        >
-          <h1 className="text-3xl font-bold mb-6 text-center text-black">
-            Create an Account
-          </h1>
+      <main className="flex-1 flex flex-col items-center justify-center pt-24">
+        <div className="w-full max-w-md bg-white p-8 shadow-md rounded-lg mt-12 mb-12">
+          <h1 className="text-3xl font-bold text-center mb-6">Sign Up</h1>
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-          <form onSubmit={handleSubmit}>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
-              name="fullName"
-              placeholder="Full Name"
-              value={formData.fullName}
+              name="firstName"
+              placeholder="First Name"
+              value={formData.firstName}
               onChange={handleChange}
-              className="w-full mb-4 p-3 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded"
+            />
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded"
             />
             <input
               type="email"
@@ -84,7 +100,7 @@ export default function SignupPage() {
               placeholder="Email Address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full mb-4 p-3 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded"
             />
             <input
               type="password"
@@ -92,7 +108,7 @@ export default function SignupPage() {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full mb-4 p-3 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded"
             />
             <input
               type="password"
@@ -100,8 +116,9 @@ export default function SignupPage() {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full mb-4 p-3 border border-gray-300 rounded"
+              className="w-full p-3 border border-gray-300 rounded"
             />
+
             <button
               type="submit"
               className="w-full py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
@@ -109,16 +126,17 @@ export default function SignupPage() {
               Sign Up
             </button>
           </form>
-          <p className="text-center mt-4 text-sm text-gray-600">
+
+          <p className="text-center mt-4">
             Already have an account?{" "}
             <Link href="/login" className="text-blue-600 hover:underline">
-              Login
+              Log In
             </Link>
           </p>
         </div>
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER (Same as page.tsx) */}
       <footer className="bg-green-900 text-white py-8 px-6">
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
           <h2 className="text-2xl font-bold">Driving School</h2>
@@ -143,22 +161,6 @@ export default function SignupPage() {
           © 2025 Driving School. All rights reserved.
         </div>
       </footer>
-
-      {/* Success Popup */}
-      {success && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Success!</h2>
-            <p className="mb-4">Account successfully created.</p>
-            <button
-              onClick={() => setSuccess(false)}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -3,25 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from "@/library/firebase"; // Adjust path if needed
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/library/firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [loginSuccess, setLoginSuccess] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
 
   // Update form state on input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   // Handle login form submission
@@ -29,10 +23,37 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      setLoginSuccess(true);
-      // Optionally, clear form fields
-      setFormData({ email: "", password: "" });
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
+
+      // Fetch the user document from Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        // Redirect based on the user's role
+        if (userData.role === "admin") {
+          router.push("/admin");
+        } else if (userData.role === "student") {
+          router.push("/student");
+        } else if (userData.role === "instructor") {
+          if (userData.approved) {
+            router.push("/instructor");
+          } else {
+            setError("Your account is pending admin approval.");
+            await signOut(auth);
+          }
+        } else {
+          setError("User role is not defined.");
+        }
+      } else {
+        setError("No user data found.");
+      }
     } catch (err: any) {
       setError(err.message);
     }
@@ -49,9 +70,7 @@ export default function LoginPage() {
 
       {/* MAIN CONTENT: LOGIN FORM */}
       <main className="flex-1 flex flex-col items-center justify-center bg-gray-100 pt-24">
-        <div
-          className="w-full max-w-md mx-auto bg-green-100 p-8 shadow-md rounded-lg mt-12 mb-12 transform transition-transform hover:scale-105 hover:shadow-xl"
-        >
+        <div className="w-full max-w-md mx-auto bg-green-100 p-8 shadow-md rounded-lg mt-12 mb-12 transform transition-transform hover:scale-105 hover:shadow-xl">
           <h1 className="text-3xl font-bold mb-6 text-center text-black">
             Log In to Your Account
           </h1>
@@ -118,30 +137,10 @@ export default function LoginPage() {
         </div>
       </footer>
 
-      {/* Login Success Popup */}
-      {loginSuccess && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Success!</h2>
-            <p className="mb-4">Logged in successfully.</p>
-            <button
-              onClick={() => {
-                setLoginSuccess(false);
-                // Optionally, redirect after login success
-                // router.push("/dashboard");
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Signup Modal Overlay */}
+      {/* SIGNUP MODAL OVERLAY */}
       {showSignupModal && (
         <div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
           onClick={() => setShowSignupModal(false)}
         >
           <div
@@ -168,7 +167,10 @@ export default function LoginPage() {
                 Want to Learn
               </button>
               <button
-                onClick={() => setShowSignupModal(false)}
+                onClick={() => {
+                  setShowSignupModal(false);
+                  router.push("/instructorSignup");
+                }}
                 className="w-full py-4 bg-blue-600 text-white rounded-md hover:bg-yellow-500 text-xl"
               >
                 Want to Teach
