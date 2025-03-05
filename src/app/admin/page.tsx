@@ -30,6 +30,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fetch pending instructors
   useEffect(() => {
     const fetchPendingInstructors = async () => {
       try {
@@ -41,7 +42,10 @@ export default function AdminPanel() {
         const querySnapshot = await getDocs(q);
         const instructors: Instructor[] = [];
         querySnapshot.forEach((docSnap) => {
-          instructors.push({ id: docSnap.id, ...(docSnap.data() as Omit<Instructor, "id">) });
+          instructors.push({
+            id: docSnap.id,
+            ...(docSnap.data() as Omit<Instructor, "id">),
+          });
         });
         setPendingInstructors(instructors);
         setLoading(false);
@@ -54,8 +58,29 @@ export default function AdminPanel() {
     fetchPendingInstructors();
   }, []);
 
+  // Approve instructor
+  const handleApprove = async (id: string) => {
+    try {
+      const instructorRef = doc(db, "users", id);
+      await updateDoc(instructorRef, { approved: true });
+      setPendingInstructors((prev) => prev.filter((inst) => inst.id !== id));
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
+
+  // Reject instructor (delete their record)
+  const handleReject = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "users", id));
+      setPendingInstructors((prev) => prev.filter((inst) => inst.id !== id));
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
+
   return (
-    <ProtectedRoute allowedRoles={["admin"]}> {/* ✅ Protecting the route */}
+    <ProtectedRoute allowedRoles={["admin"]}>
       <div className="font-sans min-h-screen flex flex-col">
         {/* HEADER */}
         <header className="fixed top-0 left-0 w-full flex justify-between items-center p-6 bg-black bg-opacity-70 backdrop-blur-md border-b border-white/20 shadow-lg z-50">
@@ -66,7 +91,9 @@ export default function AdminPanel() {
 
         {/* MAIN CONTENT */}
         <main className="flex-1 bg-gray-100 pt-24 px-4">
-          <h1 className="text-3xl font-bold mb-6 text-center">Admin Panel - Pending Instructor Approvals</h1>
+          <h1 className="text-3xl font-bold mb-6 text-center">
+            Admin Panel - Pending Instructor Approvals
+          </h1>
 
           {loading ? (
             <p className="text-center">Loading pending instructors...</p>
@@ -96,12 +123,31 @@ export default function AdminPanel() {
                       <td className="py-2 px-4 border">{inst.licenseNumber}</td>
                       <td className="py-2 px-4 border">
                         {inst.documentURL ? (
-                          <a href={inst.documentURL} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                          <a
+                            href={inst.documentURL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline"
+                          >
                             View Document
                           </a>
                         ) : (
                           "No Document"
                         )}
+                      </td>
+                      <td className="py-2 px-4 border space-x-2">
+                        <button
+                          onClick={() => handleApprove(inst.id)}
+                          className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(inst.id)}
+                          className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                        >
+                          Reject
+                        </button>
                       </td>
                     </tr>
                   ))}
