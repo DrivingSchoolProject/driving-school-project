@@ -3,16 +3,15 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AnimatedOnScroll from "@/components/AnimatedOnScroll";
+import Footer from "@/components/Footer"; // Import the new Footer component
 
 export default function Home() {
-  // Define instructors
   const instructors = useMemo(
     () => [
       {
         name: "travis",
         image: "/travis.webp",
-        review:
-          "⭐⭐⭐⭐⭐ Fantastic instructor, extremely patient and knowledgeable.",
+        review: "⭐⭐⭐⭐⭐ Fantastic instructor, extremely patient and knowledgeable.",
       },
       {
         name: "lincon",
@@ -37,23 +36,18 @@ export default function Home() {
       {
         name: "martin",
         image: "/martin.jpg",
-        review:
-          "⭐⭐⭐⭐⭐ Outstanding instructor with a wealth of experience.",
+        review: "⭐⭐⭐⭐⭐ Outstanding instructor with a wealth of experience.",
       },
       {
         name: "guild",
         image: "/guild.jpg",
-        review:
-          "⭐⭐⭐⭐⭐ Patient and well-structured lessons that build confidence.",
+        review: "⭐⭐⭐⭐⭐ Patient and well-structured lessons that build confidence.",
       },
     ],
     []
   );
 
-  // Modal state to toggle overlay visibility
   const [showModal, setShowModal] = useState(false);
-
-  // Next.js router for navigation
   const router = useRouter();
 
   return (
@@ -93,10 +87,7 @@ export default function Home() {
           <AnimatedOnScroll animationClass="animate-slideInDown" delay="0s">
             <h1
               className="text-5xl font-bold"
-              style={{
-                WebkitTextStroke: "1px black",
-                WebkitTextFillColor: "gold",
-              }}
+              style={{ WebkitTextStroke: "1px black", WebkitTextFillColor: "gold" }}
             >
               Learn to Drive with Confidence
             </h1>
@@ -129,33 +120,25 @@ export default function Home() {
             <AnimatedOnScroll animationClass="animate-fadeIn" delay="0.3s">
               <div className="flex flex-col items-center text-center">
                 <img src="/maps.svg" alt="Choose Your Area" className="w-16 h-16" />
-                <h3 className="mt-4 text-xl font-semibold text-white">
-                  Choose Your Area
-                </h3>
+                <h3 className="mt-4 text-xl font-semibold text-white">Choose Your Area</h3>
               </div>
             </AnimatedOnScroll>
             <AnimatedOnScroll animationClass="animate-fadeIn" delay="0.5s">
               <div className="flex flex-col items-center text-center">
                 <img src="/group.svg" alt="Top Instructors" className="w-16 h-16" />
-                <h3 className="mt-4 text-xl font-semibold text-white">
-                  Top Instructors
-                </h3>
+                <h3 className="mt-4 text-xl font-semibold text-white">Top Instructors</h3>
               </div>
             </AnimatedOnScroll>
             <AnimatedOnScroll animationClass="animate-fadeIn" delay="0.7s">
               <div className="flex flex-col items-center text-center">
                 <img src="/globev.svg" alt="Multiple Languages" className="w-16 h-16" />
-                <h3 className="mt-4 text-xl font-semibold text-white">
-                  Multiple Languages
-                </h3>
+                <h3 className="mt-4 text-xl font-semibold text-white">Multiple Languages</h3>
               </div>
             </AnimatedOnScroll>
             <AnimatedOnScroll animationClass="animate-fadeIn" delay="0.9s">
               <div className="flex flex-col items-center text-center">
                 <img src="/shield.svg" alt="Safe & Secure" className="w-16 h-16" />
-                <h3 className="mt-4 text-xl font-semibold text-white">
-                  Safe & Secure
-                </h3>
+                <h3 className="mt-4 text-xl font-semibold text-white">Safe & Secure</h3>
               </div>
             </AnimatedOnScroll>
           </div>
@@ -166,23 +149,18 @@ export default function Home() {
       <section className="py-16 px-6 md:px-20 bg-gray-100 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 flex justify-center">
           <AnimatedOnScroll animationClass="animate-slideInLeft" delay="0.3s">
-            <img
-              src="/7299149.jpg"
-              alt="Safety First"
-              className="w-full max-w-md rounded-lg shadow-lg"
-            />
+            <img src="/7299149.jpg" alt="Safety First" className="w-full max-w-md rounded-lg shadow-lg" />
           </AnimatedOnScroll>
         </div>
         <div className="md:w-1/2 text-center md:text-left mt-8 md:mt-0">
           <AnimatedOnScroll animationClass="animate-slideInRight" delay="0.3s">
-            <h2 className="text-4xl font-bold text-gray-900">
-              Your Safety Comes First
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-900">Your Safety Comes First</h2>
           </AnimatedOnScroll>
           <AnimatedOnScroll animationClass="animate-fadeIn" delay="0.5s">
             <p className="mt-4 text-gray-700">
-              We prioritize your safety from the moment you begin your training. Before, during, and after every session, our commitment to you never wavers.
-              Our vehicles are meticulously sanitized to ensure a secure journey. With real-time support always at hand, your well-being remains our utmost priority.
+              We prioritize your safety from the moment you begin your training. Before, during, and after every session,
+              our commitment to you never wavers. Our vehicles are meticulously sanitized to ensure a secure journey.
+              With real-time support always at hand, your well-being remains our utmost priority.
             </p>
           </AnimatedOnScroll>
         </div>
@@ -191,9 +169,7 @@ export default function Home() {
       {/* WHY CHOOSE US? SECTION */}
       <section className="py-16 px-6 md:px-20 bg-green-100">
         <AnimatedOnScroll animationClass="animate-fadeInUp" delay="0.3s">
-          <h2 className="text-4xl font-bold text-center text-black mb-8">
-            Why Choose Us?
-          </h2>
+          <h2 className="text-4xl font-bold text-center text-black mb-8">Why Choose Us?</h2>
         </AnimatedOnScroll>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatedOnScroll animationClass="animate-fadeInUp" delay="0.4s">
@@ -247,7 +223,7 @@ export default function Home() {
                 Live Location Tracking
               </h3>
               <p className="text-gray-800">
-                Stay updated with real-time tracking of your instructor's location so you never miss a session.
+                Stay updated with real-time tracking of your instructor&apos;s location so you never miss a session.
               </p>
             </div>
           </AnimatedOnScroll>
@@ -267,9 +243,7 @@ export default function Home() {
 
       {/* INSTRUCTOR SECTION (Infinite Marquee) */}
       <section className="py-16 px-6 md:px-20 bg-black">
-        <h2 className="text-4xl font-bold text-center text-white mb-8">
-          Meet the Instructors
-        </h2>
+        <h2 className="text-4xl font-bold text-center text-white mb-8">Meet the Instructors</h2>
         <div className="relative overflow-hidden">
           <div className="flex flex-nowrap gap-8 animate-marquee">
             {[...instructors, ...instructors].map((inst, index) => (
@@ -278,15 +252,9 @@ export default function Home() {
                 className="w-80 aspect-square flex-shrink-0 p-6 bg-gray-900 shadow-lg rounded-lg flex flex-col items-center text-center"
               >
                 <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg">
-                  <img
-                    src={inst.image}
-                    alt={inst.name}
-                    className="w-full h-full object-cover object-center"
-                  />
+                  <img src={inst.image} alt={inst.name} className="w-full h-full object-cover object-center" />
                 </div>
-                <h3 className="text-xl font-bold text-white mt-4 capitalize">
-                  {inst.name}
-                </h3>
+                <h3 className="text-xl font-bold text-white mt-4 capitalize">{inst.name}</h3>
                 <p className="mt-2 text-gray-400">{inst.review}</p>
               </div>
             ))}
@@ -297,12 +265,10 @@ export default function Home() {
       {/* BECOME AN INSTRUCTOR SECTION */}
       <section className="py-16 px-6 md:px-20 bg-green-100 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-          <h2 className="text-4xl font-bold text-black-900 mb-4">
-            Want To Become An Instructor
-          </h2>
+          <h2 className="text-4xl font-bold text-black-900 mb-4">Want To Become An Instructor</h2>
           <p className="text-black-700 mb-6">
-            Join our platform to grow your business while shaping the next generation of drivers.
-            Enjoy flexible scheduling, reliable payments, and comprehensive support.
+            Join our platform to grow your business while shaping the next generation of drivers. Enjoy flexible
+            scheduling, reliable payments, and comprehensive support.
           </p>
           <ul className="space-y-3">
             <li className="flex items-start">
@@ -324,7 +290,6 @@ export default function Home() {
           </ul>
         </div>
         <div className="md:w-1/2">
-          {/* Apply to Join Card with Spotlight Effect */}
           <div className="bg-white p-6 shadow-[0_0_20px_5px_rgba(255,215,0,0.5)] rounded-lg max-w-md mx-auto w-full transition-transform transform hover:scale-105">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Apply to Join</h3>
             <form
@@ -333,21 +298,9 @@ export default function Home() {
                 setShowModal(true);
               }}
             >
-              <input
-                type="text"
-                placeholder="Full Name"
-                className="w-full mb-4 p-3 border border-gray-300 rounded"
-              />
-              <input
-                type="email"
-                placeholder="Email Address"
-                className="w-full mb-4 p-3 border border-gray-300 rounded"
-              />
-              <input
-                type="tel"
-                placeholder="Phone Number"
-                className="w-full mb-4 p-3 border border-gray-300 rounded"
-              />
+              <input type="text" placeholder="Full Name" className="w-full mb-4 p-3 border border-gray-300 rounded" />
+              <input type="email" placeholder="Email Address" className="w-full mb-4 p-3 border border-gray-300 rounded" />
+              <input type="tel" placeholder="Phone Number" className="w-full mb-4 p-3 border border-gray-300 rounded" />
               <input
                 type="text"
                 placeholder="Driver's License Number"
@@ -358,10 +311,7 @@ export default function Home() {
                 className="w-full mb-4 p-3 border border-gray-300 rounded"
                 rows={4}
               />
-              <button
-                type="submit"
-                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition"
-              >
+              <button type="submit" className="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
                 Apply Now
               </button>
             </form>
@@ -369,31 +319,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-green-900 text-white py-8 px-6">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
-          <h2 className="text-2xl font-bold">Driving School</h2>
-          <div className="flex flex-wrap justify-center gap-6">
-            {["Features", "Pricing", "FAQ", "Privacy Policy", "Terms of Service"].map(
-              (link, index) => (
-                <a key={index} href="#" className="hover:text-white transition">
-                  {link}
-                </a>
-              )
-            )}
-          </div>
-          <div className="flex space-x-4 mt-6 md:mt-0">
-            {["facebook", "twitter", "instagram"].map((icon, index) => (
-              <a key={index} href="#" className="hover:text-white transition">
-                <img src={`/${icon}.svg`} alt={icon} className="w-6 h-6" />
-              </a>
-            ))}
-          </div>
-        </div>
-        <div className="text-center text-sm mt-6">
-          © 2025 Driving School. All rights reserved.
-        </div>
-      </footer>
+      <Footer /> {/* Replace inline footer with Footer component */}
 
       {/* MODAL OVERLAY */}
       {showModal && (
@@ -401,19 +327,14 @@ export default function Home() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
           onClick={() => setShowModal(false)}
         >
-          <div
-            className="relative bg-black p-8 rounded-lg shadow-lg w-80"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative bg-black p-8 rounded-lg shadow-lg w-80" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl font-bold"
             >
               ×
             </button>
-            <h2 className="text-2xl font-bold mb-6 text-center text-white">
-              Choose
-            </h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-white">Choose</h2>
             <div className="flex flex-col space-y-4">
               <button
                 onClick={() => {

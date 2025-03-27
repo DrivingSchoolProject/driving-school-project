@@ -1,4 +1,3 @@
-// app/instructorSignup/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -70,7 +69,7 @@ export default function InstructorSignupPage() {
         documentURL = await getDownloadURL(storageRef);
       }
 
-      // Save instructor details in Firestore, including the document URL
+      // Save instructor details in Firestore, including the document URL and instructorId
       await setDoc(doc(db, "users", userCredential.user.uid), {
         fullName: formData.fullName,
         email: formData.email,
@@ -79,6 +78,7 @@ export default function InstructorSignupPage() {
         experience: formData.experience,
         licenseNumber: formData.licenseNumber,
         documentURL, // URL of the uploaded document (if any)
+        instructorId: userCredential.user.uid, // Add instructorId field, set to the user's uid
       });
 
       // Sign the user out since they need admin approval before logging in
@@ -86,6 +86,7 @@ export default function InstructorSignupPage() {
 
       // Redirect to the pending approval page
       router.push("/pendingApproval");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     }
