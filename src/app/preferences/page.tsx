@@ -106,98 +106,105 @@ export default function PreferencesPage() {
             </h1>
             {error && <p className="text-red-600 text-center mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block mb-1 font-semibold">Age</label>
-                <input
-                  type="number"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                  placeholder="Your age"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Vehicle Preference</label>
-                <input
-                  type="text"
-                  name="vehiclePreference"
-                  value={formData.vehiclePreference}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                  placeholder="e.g., Manual, Automatic"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Language Preference</label>
-                <input
-                  type="text"
-                  name="languagePreference"
-                  value={formData.languagePreference}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                  placeholder="e.g., English, Spanish"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Instructor Gender Preference</label>
-                <select
-                  name="instructorGender"
-                  value={formData.instructorGender}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                >
-                  <option value="">No Preference</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Experience Level</label>
-                <select
-                  name="experienceLevel"
-                  value={formData.experienceLevel}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 rounded"
-                >
-                  <option value="">Select Level</option>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">Special Requirements</label>
-                <textarea
-                  name="specialRequirements"
-                  value={formData.specialRequirements}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full p-3 border border-gray-300 rounded"
-                  placeholder="Any special requirements?"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition"
-              >
-                Save Preferences
-              </button>
-            </form>
+  <div>
+    <label className="block mb-1 font-semibold">Age</label>
+    <input
+      type="number"
+      name="age"
+      value={formData.age}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+      placeholder="Your age"
+    />
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Gender</label>
+    <select
+      name="gender"
+      value={formData.gender}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+    >
+      <option value="">Select Gender</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Vehicle Preference</label>
+    <input
+      type="text"
+      name="vehiclePreference"
+      value={formData.vehiclePreference}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+      placeholder="e.g., Manual, Automatic"
+    />
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Language Preference</label>
+    <input
+      type="text"
+      name="languagePreference"
+      value={formData.languagePreference}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+      placeholder="e.g., English, Spanish"
+    />
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Instructor Gender Preference</label>
+    <select
+      name="instructorGender"
+      value={formData.instructorGender}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+    >
+      <option value="">No Preference</option>
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Experience Level</label>
+    <select
+      name="experienceLevel"
+      value={formData.experienceLevel}
+      onChange={handleChange}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+    >
+      <option value="">Select Level</option>
+      <option value="beginner">Beginner</option>
+      <option value="intermediate">Intermediate</option>
+      <option value="advanced">Advanced</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="block mb-1 font-semibold">Special Requirements</label>
+    <textarea
+      name="specialRequirements"
+      value={formData.specialRequirements}
+      onChange={handleChange}
+      rows={4}
+      className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
+      placeholder="Any special requirements?"
+    />
+  </div>
+
+  <button
+    type="submit"
+    className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white py-3 rounded-lg font-semibold shadow-md hover:scale-105 transition-transform"
+  >
+    Save Preferences
+  </button>
+</form>
           </div>
         </main>
 

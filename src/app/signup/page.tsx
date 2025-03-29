@@ -46,8 +46,9 @@ export default function SignupPage() {
       );
       const user = userCredential.user;
 
-      // Save user info in Firestore
+      // Save user info in Firestore with explicit id field
       await setDoc(doc(db, "users", user.uid), {
+        id: user.uid,
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -136,7 +137,7 @@ export default function SignupPage() {
         </div>
       </main>
 
-      {/* FOOTER (Same as page.tsx) */}
+      {/* FOOTER */}
       <footer className="bg-green-900 text-white py-8 px-6">
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
           <h2 className="text-2xl font-bold">Driving School</h2>
@@ -164,3 +165,4 @@ export default function SignupPage() {
     </div>
   );
 }
+
