@@ -11,6 +11,8 @@ import {
   query,
   where,
   getDocs,
+  FirestoreDataConverter,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -24,18 +26,55 @@ import {
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// If you have a ReservationDetails component/page, import it:
-import ReservationDetails from "@/app/ReservationDetails/page";
+// Define our instructor interface
+export interface InstructorData {
+  id: string;
+  fullName: string;
+  profilePic?: string;
+  bestReview?: string;
+  availability?: {
+    date: string;
+    startTime: string;
+    endTime: string;
+  }[];
+}
+
+// Firestore data converter (optional but helps with TypeScript)
+const instructorConverter: FirestoreDataConverter<InstructorData> = {
+  toFirestore(instructor: InstructorData) {
+    return {
+      fullName: instructor.fullName,
+      profilePic: instructor.profilePic,
+      bestReview: instructor.bestReview,
+      availability: instructor.availability,
+    };
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot): InstructorData {
+    const data = snapshot.data();
+    return {
+      id: snapshot.id,
+      fullName: data.fullName,
+      profilePic: data.profilePic,
+      bestReview: data.bestReview,
+      availability: data.availability,
+    };
+  },
+};
 
 export default function StudentDashboard() {
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [instructors, setInstructors] = useState<any[]>([]);
+  const [instructors, setInstructors] = useState<InstructorData[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
 
-  // Active tab: "preferences", "reservation", "notifications"
+  // Active tab: "preferences", "reservation", "notifications", "bookings"
   const [activeTab, setActiveTab] = useState("preferences");
+
+  // Booking states for date and time only (no direct instructor selection here)
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -44,56 +83,63 @@ export default function StudentDashboard() {
         return;
       }
 
+      // Fetch the student data
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
-
       if (!docSnap.exists()) {
         router.push("/login");
         return;
       }
-
       const data = docSnap.data();
       if (data.role !== "student") {
         router.push("/login");
         return;
       }
-
       setUserData(data);
 
-      // Fetch instructors
+      // Fetch some instructors for the "Best Instructor Matches" slider
+      const instructorsRef = collection(db, "users").withConverter(instructorConverter);
       const instructorsQuery = query(
-        collection(db, "users"),
+        instructorsRef,
         where("role", "==", "instructor"),
         where("approved", "==", true)
       );
       const instructorsSnap = await getDocs(instructorsQuery);
-      const instructorList = instructorsSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
+      const instructorList: InstructorData[] = instructorsSnap.docs.map((doc) => doc.data());
       setInstructors(instructorList);
+
+      // Optionally, fetch the student's existing bookings
+      fetchBookings(user.uid);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading...
-      </div>
-    );
-  }
+  const fetchBookings = async (studentId: string) => {
+    try {
+      const bookingsQuery = query(
+        collection(db, "bookings"),
+        where("studentId", "==", studentId)
+      );
+      const bookingsSnap = await getDocs(bookingsQuery);
+      const bookingList = bookingsSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBookings(bookingList);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
 
   // Slider settings for the instructor slider
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 1000,         // 1 second transition
+    speed: 1000,
     autoplay: true,
-    autoplaySpeed: 4000, // 4 seconds per slide
+    autoplaySpeed: 4000,
     slidesToShow: 3,
     slidesToScroll: 1,
     responsive: [
@@ -108,8 +154,25 @@ export default function StudentDashboard() {
     ],
   };
 
-  // Safely read the user's preferences
   const prefs = userData?.preferences || {};
+
+  // "Find Available Instructors" function
+  const handleFindInstructors = () => {
+    if (!selectedDate || !selectedTime) {
+      alert("Please select both a date and time.");
+      return;
+    }
+    // Navigate to the instructor-list page with the date/time in the query
+    router.push(`/instructor-list?date=${selectedDate}&time=${selectedTime}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <ProtectedRoute allowedRoles={["student"]}>
@@ -120,7 +183,10 @@ export default function StudentDashboard() {
           <div className="text-2xl font-bold text-white">
             <Link href="/">Driving School</Link>
           </div>
-          <UserCircleIcon className="w-8 h-8 text-white cursor-pointer" />
+          <UserCircleIcon
+            className="w-8 h-8 text-white cursor-pointer"
+            onClick={() => router.push("/student/profile")}
+          />
         </header>
 
         {/* MAIN CONTENT */}
@@ -153,9 +219,8 @@ export default function StudentDashboard() {
             </Slider>
           </section>
 
-          {/* TAB NAVIGATION (FULL WIDTH) */}
+          {/* TAB NAVIGATION */}
           <section className="mb-8">
-            {/* Full-width tab row */}
             <div className="flex w-full border-b border-gray-300 text-lg">
               <button
                 onClick={() => setActiveTab("preferences")}
@@ -187,9 +252,19 @@ export default function StudentDashboard() {
               >
                 Notifications
               </button>
+              <button
+                onClick={() => setActiveTab("bookings")}
+                className={`flex-1 text-center py-3 focus:outline-none ${
+                  activeTab === "bookings"
+                    ? "border-b-4 border-green-600 text-green-700 font-semibold"
+                    : "text-gray-600 hover:bg-green-100 transition-colors"
+                }`}
+              >
+                My Bookings
+              </button>
             </div>
 
-            {/* Tab content */}
+            {/* TAB CONTENT */}
             <div className="p-4 bg-white rounded shadow mt-2">
               {activeTab === "preferences" && (
                 <div>
@@ -197,22 +272,11 @@ export default function StudentDashboard() {
                   <ul className="text-sm text-gray-700 space-y-1">
                     <li>Age: {prefs.age || "N/A"}</li>
                     <li>Gender: {prefs.gender || "N/A"}</li>
-                    <li>
-                      Vehicle Preference: {prefs.vehiclePreference || "N/A"}
-                    </li>
-                    <li>
-                      Language Preference: {prefs.languagePreference || "N/A"}
-                    </li>
-                    <li>
-                      Instructor Gender: {prefs.instructorGender || "N/A"}
-                    </li>
-                    <li>
-                      Experience Level: {prefs.experienceLevel || "N/A"}
-                    </li>
-                    <li>
-                      Special Requirements:{" "}
-                      {prefs.specialRequirements || "N/A"}
-                    </li>
+                    <li>Vehicle Preference: {prefs.vehiclePreference || "N/A"}</li>
+                    <li>Language Preference: {prefs.languagePreference || "N/A"}</li>
+                    <li>Instructor Gender: {prefs.instructorGender || "N/A"}</li>
+                    <li>Experience Level: {prefs.experienceLevel || "N/A"}</li>
+                    <li>Special Requirements: {prefs.specialRequirements || "N/A"}</li>
                   </ul>
                   <button
                     onClick={() => router.push("/preferences")}
@@ -225,17 +289,61 @@ export default function StudentDashboard() {
 
               {activeTab === "reservation" && (
                 <div>
-                  {/* If you have a ReservationDetails component */}
-                  <ReservationDetails />
+                  <h3 className="font-semibold mb-4">Book a Lesson</h3>
+                  <div className="flex flex-col space-y-4">
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="border rounded p-2"
+                      placeholder="Select Date"
+                    />
+                    <input
+                      type="time"
+                      value={selectedTime}
+                      onChange={(e) => setSelectedTime(e.target.value)}
+                      className="border rounded p-2"
+                      placeholder="Select Time"
+                    />
+                    <button
+                      onClick={handleFindInstructors}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Find Available Instructors
+                    </button>
+                  </div>
                 </div>
               )}
 
               {activeTab === "notifications" && (
                 <div>
                   <h3 className="font-semibold mb-2">Notifications</h3>
-                  <p className="text-gray-700">
-                    No notifications available at this time.
-                  </p>
+                  <p className="text-gray-700">No notifications available at this time.</p>
+                </div>
+              )}
+
+              {activeTab === "bookings" && (
+                <div>
+                  <h3 className="font-semibold mb-4">My Bookings</h3>
+                  {bookings.length === 0 ? (
+                    <p className="text-gray-700">No bookings yet.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {bookings.map((booking) => (
+                        <li key={booking.id} className="border rounded p-2">
+                          <p>
+                            <strong>Instructor ID:</strong> {booking.instructorId}
+                          </p>
+                          <p>
+                            <strong>Slot:</strong> {booking.slot}
+                          </p>
+                          <p>
+                            <strong>Status:</strong> {booking.status}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </div>

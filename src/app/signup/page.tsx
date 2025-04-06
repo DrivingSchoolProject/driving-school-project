@@ -12,6 +12,9 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    age: "",
+    gender: "",
+    dateOfBirth: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -51,7 +54,11 @@ export default function SignupPage() {
         id: user.uid,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        age: formData.age,
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth,
         email: formData.email,
+        password: formData.password, // Not recommended to store in plaintext
         role: "student",
         approved: true, // Students are automatically approved
       });
@@ -79,6 +86,7 @@ export default function SignupPage() {
           {error && <p className="text-red-600 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* First Name */}
             <input
               type="text"
               name="firstName"
@@ -87,6 +95,7 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded"
             />
+            {/* Last Name */}
             <input
               type="text"
               name="lastName"
@@ -95,6 +104,34 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded"
             />
+            {/* Age */}
+            <input
+              type="number"
+              name="age"
+              placeholder="Age"
+              value={formData.age}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded"
+            />
+            {/* Gender */}
+            <input
+              type="text"
+              name="gender"
+              placeholder="Gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded"
+            />
+            {/* Date of Birth */}
+            <input
+              type="date"
+              name="dateOfBirth"
+              placeholder="Date of Birth"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded"
+            />
+            {/* Email */}
             <input
               type="email"
               name="email"
@@ -103,6 +140,7 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded"
             />
+            {/* Password */}
             <input
               type="password"
               name="password"
@@ -111,6 +149,7 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full p-3 border border-gray-300 rounded"
             />
+            {/* Confirm Password */}
             <input
               type="password"
               name="confirmPassword"
@@ -165,4 +204,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
