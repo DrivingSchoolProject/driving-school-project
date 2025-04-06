@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
 } from "firebase/firestore";
 
 export default function ConfirmBookingPage() {
@@ -18,36 +19,35 @@ export default function ConfirmBookingPage() {
   const searchParams = useSearchParams();
 
   // Read from query params
-  const instructorId = searchParams.get("instructorId") || ""; 
+  const instructorId = searchParams.get("instructorId") || "";
   const instructorName = searchParams.get("instructorName") || "Instructor";
   const courseType = searchParams.get("courseType") || "N/A";
   const basePriceString = searchParams.get("price") || "0";
   const basePrice = parseFloat(basePriceString);
 
-  // If you also pass date/time, read them here:
-  // const lessonDate = searchParams.get("date") || "2025-03-26";
-  // const lessonTime = searchParams.get("time") || "13:00";
-
-  // 13% tax
+  // Calculate tax and total
   const taxRate = 0.13;
   const taxAmount = basePrice * taxRate;
   const totalPrice = basePrice + taxAmount;
 
-  // Add Card states
+  // Card form states
   const [showAddCard, setShowAddCard] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvc, setCardCvc] = useState("");
   const [cardError, setCardError] = useState("");
 
+  // Payment options state (to show add payment options)
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+
   // For success popup
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-  // We'll store the student's doc ID here after we find it by email
+  // Student document ID and saved payment methods
   const [studentDocId, setStudentDocId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Attempt to find the student's doc by their email, if they're logged in
+    // Find the student's Firestore doc by email if logged in
     const user = auth.currentUser;
     if (user && user.email) {
       findStudentDocIdByEmail(user.email)
@@ -62,13 +62,11 @@ export default function ConfirmBookingPage() {
 
   /**
    * Finds the student's doc ID by matching the user's email in Firestore.
-   * Returns the doc ID or null if not found.
    */
   const findStudentDocIdByEmail = async (email: string): Promise<string | null> => {
     const q = query(collection(db, "users"), where("email", "==", email));
     const snap = await getDocs(q);
     if (!snap.empty) {
-      // We assume the first doc is the student's doc
       return snap.docs[0].id;
     }
     return null;
@@ -76,7 +74,7 @@ export default function ConfirmBookingPage() {
 
   // Basic card validation
   const validateCard = () => {
-    if (!cardNumber || cardNumber.length < 12) {
+    if (!cardNumber || cardNumber.replace(/\s/g, "").length < 12) {
       return "Invalid card number (min 12 digits).";
     }
     if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
@@ -88,56 +86,85 @@ export default function ConfirmBookingPage() {
     return "";
   };
 
-  // Book button
+  // Save card details to Firestore
+  const handleSaveCard = async () => {
+    const err = validateCard();
+    if (err) {
+      setCardError(err);
+      return;
+    }
+    if (!studentDocId) {
+      alert("Student document not found.");
+      return;
+    }
+    const cardData = {
+      type: "card",
+      cardNumber,
+      cardExpiry,
+      cardCvc,
+      addedAt: new Date(),
+    };
+
+    try {
+      await updateDoc(doc(db, "users", studentDocId), {
+        paymentMethods: arrayUnion(cardData),
+      });
+      // Clear card form and hide it
+      setCardNumber("");
+      setCardExpiry("");
+      setCardCvc("");
+      setCardError("");
+      setShowAddCard(false);
+      setShowPaymentOptions(false);
+    } catch (err) {
+      console.error("Error saving card:", err);
+      alert("Failed to save card. Please try again.");
+    }
+  };
+
+  // Book button handler (if add card is open, it saves card first)
   const handleBook = async () => {
-    // If "Add Card" is open, validate
     if (showAddCard) {
       const err = validateCard();
       if (err) {
         setCardError(err);
         return;
       }
+      await handleSaveCard();
     }
 
-    // Ensure user is logged in
     const user = auth.currentUser;
     if (!user) {
       alert("You must be logged in as a student to book.");
       return;
     }
-
-    // Make sure we have the student's doc ID
     if (!studentDocId) {
       alert("Could not find your student profile in Firestore.");
       return;
     }
 
-    // Build a booking object
-    // We can't use serverTimestamp() in arrayUnion, so use new Date()
     const bookingData = {
       instructorName,
       courseType,
       basePrice,
       taxAmount,
       totalPrice,
-      // date: lessonDate,
-      // time: lessonTime,
-      createdAt: new Date(), // client-side date
+      createdAt: new Date(),
       studentEmail: user.email,
     };
 
     try {
-      // 1) Update the instructor doc if we have a valid instructorId
+      // Update instructor document (if instructorId exists)
       if (instructorId) {
         await updateDoc(doc(db, "users", instructorId), {
           bookings: arrayUnion({
             ...bookingData,
-            studentId: studentDocId, // link to the student's doc ID
+            studentId: studentDocId,
           }),
         });
       }
 
-      // 2) Update the student doc
+      // Update student document
       await updateDoc(doc(db, "users", studentDocId), {
         bookings: arrayUnion({
           ...bookingData,
@@ -145,10 +172,8 @@ export default function ConfirmBookingPage() {
         }),
       });
 
-      // Show success popup
+      // Show success popup and redirect after 3 seconds
       setShowSuccessPopup(true);
-
-      // After 3 seconds, redirect to the student dashboard
       setTimeout(() => {
         router.push("/student");
       }, 3000);
@@ -158,7 +183,7 @@ export default function ConfirmBookingPage() {
     }
   };
 
-  // Optional "Back" button
+  // Optional back button handler
   const handleBack = () => {
     router.back();
   };
@@ -181,38 +206,43 @@ export default function ConfirmBookingPage() {
         <p className="text-gray-700">Base Price: ${basePrice.toFixed(2)}</p>
         <p className="text-gray-700">Tax (13%): ${taxAmount.toFixed(2)}</p>
         <hr className="my-2" />
-        <p className="font-bold text-gray-900">
-          Total: ${totalPrice.toFixed(2)}
-        </p>
+        <p className="font-bold text-gray-900">Total: ${totalPrice.toFixed(2)}</p>
       </div>
 
-      {/* Payment Methods */}
+      {/* Payment Methods Section */}
       <div className="w-full max-w-md bg-white p-4 rounded shadow mb-4">
-        <h2 className="text-xl font-semibold mb-2">Pay with</h2>
-        <div className="flex space-x-4">
-          <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
-            Google Pay
-          </button>
-          <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
-            Apple Pay
-          </button>
-          <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
-            PayPal
-          </button>
-        </div>
-      </div>
-
-      {/* Add Card */}
-      <div className="w-full max-w-md bg-white p-4 rounded shadow mb-4">
-        <h2 className="text-xl font-semibold mb-2">Add Card</h2>
-        {!showAddCard ? (
+        <h2 className="text-xl font-semibold mb-2">Payment Method</h2>
+        {/* If no payment options are currently shown, display an "Add Payment Method" button */}
+        {!showPaymentOptions && (
           <button
-            onClick={() => setShowAddCard(true)}
+            onClick={() => setShowPaymentOptions(true)}
             className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
           >
-            Add Card
+            Add Payment Method
           </button>
-        ) : (
+        )}
+        {/* When options are shown, display them */}
+        {showPaymentOptions && (
+          <div className="mt-2 space-y-2">
+            <button
+              onClick={() => setShowAddCard(true)}
+              className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
+            >
+              Add Card
+            </button>
+            <button className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
+              Google Pay
+            </button>
+            <button className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
+              Apple Pay
+            </button>
+            <button className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition">
+              PayPal
+            </button>
+          </div>
+        )}
+        {/* If "Add Card" is chosen, show card details form */}
+        {showAddCard && (
           <div className="mt-2 p-4 border rounded shadow-inner bg-gray-100 transition-all">
             <div className="mb-3">
               <label className="block text-sm font-medium mb-1">Card Number</label>
@@ -246,9 +276,13 @@ export default function ConfirmBookingPage() {
                 />
               </div>
             </div>
-            {cardError && (
-              <p className="text-red-500 text-sm mb-2">{cardError}</p>
-            )}
+            {cardError && <p className="text-red-500 text-sm mb-2">{cardError}</p>}
+            <button
+              onClick={handleSaveCard}
+              className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            >
+              Save Card
+            </button>
           </div>
         )}
       </div>
@@ -262,21 +296,17 @@ export default function ConfirmBookingPage() {
       </button>
 
       {/* Optional: Back Button */}
-      <button
-        onClick={handleBack}
-        className="mt-2 text-gray-600 hover:underline"
-      >
+      <button onClick={handleBack} className="mt-2 text-gray-600 hover:underline">
         Back
       </button>
 
-      {/* SUCCESS POPUP OVERLAY */}
+      {/* SUCCESS POPUP */}
       {showSuccessPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
           <div className="bg-yellow-100 p-6 rounded shadow-md max-w-sm text-center">
             <h3 className="text-lg font-bold mb-2">Congratulations!</h3>
             <p className="text-gray-700 mb-4">
-              We have successfully booked your lesson with {instructorName}.
-              <br />
+              We have successfully booked your lesson with {instructorName}.<br />
               Taking you to the dashboard now...
             </p>
           </div>
