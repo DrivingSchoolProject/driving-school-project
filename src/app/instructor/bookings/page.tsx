@@ -60,8 +60,8 @@ export default function BookingsPage() {
           studentName: booking.studentEmail,
           studentEmail: booking.studentEmail,
           lessonType: booking.courseType,
-          date: timestampToString(booking.date || booking.createdAt),
-          time: booking.time || extractTime(booking.date || booking.createdAt),
+          date: timestampToString(booking.bookingDateTime || booking.createdAt),
+          time: booking.time || extractTime(booking.bookingDateTime || booking.createdAt),
           status: booking.status || "pending",
           paymentStatus: booking.paymentStatus || "pending",
           notes: booking.notes || "",
@@ -70,7 +70,7 @@ export default function BookingsPage() {
           totalPrice: booking.totalPrice || 0,
           createdAt: timestampToString(booking.createdAt),
           instructorId: booking.instructorId || user.uid,
-          rawDate: booking.date || booking.createdAt, // Store raw date for filtering
+          rawDate: booking.bookingDateTime || booking.createdAt, // Store raw date for filtering
         };
       });
 
