@@ -149,31 +149,33 @@ export default function InstructorDashboard() {
 
   const getUpcomingBookings = (bookings: any[]) => {
     const now = new Date();
+  
     return bookings.filter((booking) => {
       let bookingDate: Date;
-      if (booking.date) {
-        if (booking.date.toMillis) {
-          bookingDate = new Date(booking.date.toMillis());
+  
+      if (booking.bookingDateTime) {
+        // Firestore Timestamp object (with .toMillis method)
+        if (typeof booking.bookingDateTime.toMillis === 'function') {
+          bookingDate = new Date(booking.bookingDateTime.toMillis());
         } else {
-          bookingDate = new Date(booking.date);
+          // fallback if it's already a JS Date or timestamp string/number
+          bookingDate = new Date(booking.bookingDateTime);
         }
-      } else if (booking.createdAt) {
-        bookingDate = booking.createdAt.toMillis
-          ? new Date(booking.createdAt.toMillis())
-          : new Date(booking.createdAt);
       } else {
+        // fallback to current time if bookingDateTime doesn't exist
         bookingDate = new Date();
       }
-
-      console.log("Booking Date:", bookingDate, "Now:", now);
+  
       const isUpcoming = bookingDate >= now;
+  
+      console.log("Booking Date:", bookingDate, "Now:", now);
       if (isUpcoming) {
         console.log("Upcoming Booking Found:", booking);
       }
+  
       return isUpcoming;
     });
   };
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
