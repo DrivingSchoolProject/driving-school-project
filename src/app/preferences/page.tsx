@@ -135,14 +135,18 @@ export default function PreferencesPage() {
 
   <div>
     <label className="block mb-1 font-semibold">Vehicle Preference</label>
-    <input
-      type="text"
+    <select
       name="vehiclePreference"
       value={formData.vehiclePreference}
       onChange={handleChange}
       className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:shadow-md"
-      placeholder="e.g., Manual, Automatic"
-    />
+      
+      >
+        <option value="">Select Vehicle Type</option>
+      <option value="Sedan">Sedan</option>
+      <option value="Hatchback">Hatchback</option>
+      <option value="SUV">SUV</option>
+    </select>
   </div>
 
   <div>

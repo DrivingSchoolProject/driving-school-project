@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/library/firebase";
+import Footer from "@/components/Footer"; // Import the new Footer component
 import {
   collection,
   query,
@@ -161,13 +162,8 @@ export default function InstructorList() {
           )}
         </div>
       </div>
-
-      {/* FOOTER */}
-      <footer className="w-full p-4 bg-green-900 text-white mt-8">
-        <div className="container mx-auto text-center">
-          © {new Date().getFullYear()} Driving School. All rights reserved.
-        </div>
-      </footer>
+{/* FOOTER */}
+      <Footer /> {/* Replace inline footer with Footer component */}
     </div>
   );
 }
