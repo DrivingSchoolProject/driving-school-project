@@ -1,83 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/library/firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-  deleteDoc,
-} from "firebase/firestore";
 import Link from "next/link";
-import ProtectedRoute from "@/components/ProtectedRoute"; // ✅ Route protection added
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-interface Instructor {
-  id: string;
-  fullName: string;
-  email: string;
-  experience: string;
-  licenseNumber: string;
-  documentURL?: string;
-}
-
-export default function AdminPanel() {
+export default function AdminDashboard() {
   const router = useRouter();
-  const [pendingInstructors, setPendingInstructors] = useState<Instructor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // Fetch pending instructors
-  useEffect(() => {
-    const fetchPendingInstructors = async () => {
-      try {
-        const q = query(
-          collection(db, "users"),
-          where("role", "==", "instructor"),
-          where("approved", "==", false)
-        );
-        const querySnapshot = await getDocs(q);
-        const instructors: Instructor[] = [];
-        querySnapshot.forEach((docSnap) => {
-          instructors.push({
-            id: docSnap.id,
-            ...(docSnap.data() as Omit<Instructor, "id">),
-          });
-        });
-        setPendingInstructors(instructors);
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchPendingInstructors();
-  }, []);
-
-  // Approve instructor
-  const handleApprove = async (id: string) => {
-    try {
-      const instructorRef = doc(db, "users", id);
-      await updateDoc(instructorRef, { approved: true });
-      setPendingInstructors((prev) => prev.filter((inst) => inst.id !== id));
-    } catch (err: any) {
-      console.error(err.message);
-    }
-  };
-
-  // Reject instructor (delete their record)
-  const handleReject = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "users", id));
-      setPendingInstructors((prev) => prev.filter((inst) => inst.id !== id));
-    } catch (err: any) {
-      console.error(err.message);
-    }
-  };
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -87,74 +16,44 @@ export default function AdminPanel() {
           <div className="text-2xl font-bold text-white">
             <Link href="/">Driving School</Link>
           </div>
+          <button
+            onClick={() => router.push("/admin/settings")}
+            className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition"
+          >
+            Settings
+          </button>
         </header>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 bg-gray-100 pt-24 px-4">
-          <h1 className="text-3xl font-bold mb-6 text-center">
-            Admin Panel - Pending Instructor Approvals
-          </h1>
+        <main className="flex-1 bg-gray-100 pt-24 px-4 flex flex-col items-center">
+          <h1 className="text-3xl font-bold mb-6 text-center">Admin Dashboard</h1>
 
-          {loading ? (
-            <p className="text-center">Loading pending instructors...</p>
-          ) : error ? (
-            <p className="text-center text-red-600">{error}</p>
-          ) : pendingInstructors.length === 0 ? (
-            <p className="text-center">No pending instructors found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4 border">Name</th>
-                    <th className="py-2 px-4 border">Email</th>
-                    <th className="py-2 px-4 border">Experience</th>
-                    <th className="py-2 px-4 border">License Number</th>
-                    <th className="py-2 px-4 border">Document</th>
-                    <th className="py-2 px-4 border">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingInstructors.map((inst) => (
-                    <tr key={inst.id}>
-                      <td className="py-2 px-4 border">{inst.fullName}</td>
-                      <td className="py-2 px-4 border">{inst.email}</td>
-                      <td className="py-2 px-4 border">{inst.experience}</td>
-                      <td className="py-2 px-4 border">{inst.licenseNumber}</td>
-                      <td className="py-2 px-4 border">
-                        {inst.documentURL ? (
-                          <a
-                            href={inst.documentURL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            View Document
-                          </a>
-                        ) : (
-                          "No Document"
-                        )}
-                      </td>
-                      <td className="py-2 px-4 border space-x-2">
-                        <button
-                          onClick={() => handleApprove(inst.id)}
-                          className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(inst.id)}
-                          className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                        >
-                          Reject
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+            <button
+              onClick={() => router.push("/admin/messages/students")}
+              className="p-4 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+            >
+              Messages from Students
+            </button>
+            <button
+              onClick={() => router.push("/admin/messages/instructors")}
+              className="p-4 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+            >
+              Messages from Instructors
+            </button>
+            <button
+              onClick={() => router.push("/admin/onboarding")}
+              className="p-4 bg-yellow-600 text-white rounded-lg shadow-md hover:bg-yellow-700 transition"
+            >
+              Onboarding Requests
+            </button>
+            <button
+              onClick={() => router.push("/admin/database")}
+              className="p-4 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition"
+            >
+              Database Overview
+            </button>
+          </div>
         </main>
       </div>
     </ProtectedRoute>

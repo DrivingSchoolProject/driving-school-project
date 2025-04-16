@@ -93,7 +93,7 @@ export default function Availability() {
           <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
             <Calendar
               onChange={handleDateChange}
-              value={date}
+              value= {date}
               className="mb-4"
             />
             {selectedTimeRange ? (
