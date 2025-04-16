@@ -18,8 +18,16 @@
         "name": "next"
       }
     ],
+
+    // NEW/UPDATED FIELDS:
+    // 1) Set baseUrl to "." (the project root)
+    // 2) Create a specific path alias for "@/library/*"
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      // This keeps your existing "@/*" => "src/*" mapping
+      "@/*": ["./src/*"],
+      // NEW: Map "@/library/*" to your "src/library" folder
+      "@/library/*": ["./src/library/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

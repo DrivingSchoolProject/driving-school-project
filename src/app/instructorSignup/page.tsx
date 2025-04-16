@@ -79,6 +79,7 @@ export default function InstructorSignupPage() {
         experience: formData.experience,
         licenseNumber: formData.licenseNumber,
         documentURL, // URL of the uploaded document (if any)
+        stage: "initial", 
       });
 
       // Sign the user out since they need admin approval before logging in

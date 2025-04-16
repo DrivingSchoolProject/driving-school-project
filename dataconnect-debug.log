@@ -1,0 +1,10 @@
+I0317 14:17:27.638052   12864 load.go:37] Reloading schema and connectors...
+I0317 14:17:27.666900   12864 control.go:59] [/emulator/diving-school 91bb] UpdateResources(): done
+Schema: sources: schema\schema.gql [2140B] 
+Connector "default": sources: connector\mutations.gql [1266B] connector\queries.gql [1880B] 
+I0317 14:17:27.681745   12864 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\HP\\Downloads\\DSP\\DSP\\driving-school-project\\dataconnect-generated\\js\\default-connector"
+I0317 14:17:27.690512   12864 collector.go:107] schema extensions wrote into "C:\\Users\\HP\\Downloads\\DSP\\DSP\\driving-school-project\\dataconnect\\.dataconnect\\schema"
+Generated sources: prelude.gql [67020B] 
+I0317 14:17:27.707767   12864 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\HP\\Downloads\\DSP\\DSP\\driving-school-project\\dataconnect-generated\\js\\default-connector"
+Generated sources: react\esm\index.esm.js [0B] index.d.ts [246B] esm\package.json [17B] index.cjs.js [152B] package.json [895B] README.md [2800B] react\index.d.ts [228B] react\index.cjs.js [0B] react\README.md [5443B] esm\index.esm.js [116B] react\package.json [468B] react\esm\package.json [17B] 
+I0317 14:17:27.725961   12864 installsdk.go:76] Running command: C:\Program Files (x86)\nodejs\npm.cmd install file:dataconnect-generated\js\default-connector
